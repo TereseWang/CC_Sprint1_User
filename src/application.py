@@ -49,7 +49,7 @@ class User(db.Model):
 def get_health():
     t = str(datetime.now())
     msg = {
-        "name": "F22-Starter-Microservice",
+        "name": "User-Microservice",
         "health": "Good",
         "at time": t
     }
