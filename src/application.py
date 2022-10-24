@@ -36,10 +36,10 @@ class User(db.Model):
 
     def toJson(self):
         return {
-            'userId': self.uid,
-            'lastName': self.last_name,
-            'firstName': self.first_name,
-            'middleName': self.middle_name,
+            'userId': self.userId,
+            'lastName': self.lastName,
+            'firstName': self.firstName,
+            'middleName': self.middleName,
             'phone': self.phone,
             'email': self.email
         }
@@ -63,22 +63,54 @@ def get_health():
 @app.route("/api/user/register", methods=["POST"])
 def register():
     try:
-        print("ok")
         lastName, firstName, middleName, phone, email, pwd, confirmedPwd = request.json['lastName'], request.json['firstName'], \
                                                              request.json['middleName'], request.json['phone'], request.json['email'], request.json['password'], request.json['confirmedPassword']
-
-        print(lastName)
         user = User(lastName, firstName, middleName, phone, email, pwd)
         db.session.add(user)
         db.session.commit()
-        ret = dict(success=True)
-        return ret
+        result = Response("success", status=200, content_type="application.json")
+        return result
+    except Exception as e:
+        result = Response("register failed", status=500, content_type="application.json")
+        return result
+
+
+@app.route("/api/user/login", methods=["POST"])
+def login():
+    try:
+        email, pwd = request.json['email'], request.json['password']
+        user = User.query.filter(User.email == email).first()
+        print(user)
+        if user:
+            if user.pwd == pwd:
+                result = Response("success", status=200, content_type="application.json")
+            else:
+                result = Response("invalid password", status=200, content_type="application.json")
+        else:
+            result = Response("email hasn't been registered", status=200, content_type="application.json")
+
+        return result
     except Exception as e:
         print(e)
-        ret = dict(success=False)
-        return ret
+        result = Response("register failed", status=500, content_type="application.json")
+        return result
 
 
+@app.route("/api/user/info/<uid>", methods=["GET"])
+def getUserInfo(uid):
+    try:
+        user = User.query.filter(User.userId == uid).first()
+        print(user)
+        if user:
+            msg = user.toJson()
+            result = Response(json.dumps(msg), status=200, content_type="application.json")
+        else:
+            result = Response("userId cannot be found", status=200, content_type="application.json")
+        return result
+    except Exception as e:
+        print(e)
+        result = Response("getUserInfo failed", status=500, content_type="application.json")
+        return result
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5011)
