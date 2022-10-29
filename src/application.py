@@ -2,7 +2,6 @@ from flask import Flask, Response, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
-from user_resource import UserResource
 from flask_cors import CORS
 
 db = SQLAlchemy()
