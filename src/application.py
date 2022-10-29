@@ -12,7 +12,8 @@ app = Flask(__name__,
             static_folder='static/class-ui/',
             template_folder='web/templates')
 CORS(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://chole:@localhost:3306/user_database?charset=utf8"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://admin:dbuserdbuser@ccprojectuser.coxdk1mcsnw2.us-east-1.rds.amazonaws.com/user_database?charset=utf8"
+
 db.init_app(app)
 
 
@@ -54,7 +55,6 @@ def get_health():
         "at time": t
     }
 
-    # DFF TODO Explain status codes, content type, ... ...
     result = Response(json.dumps(msg), status=200, content_type="application/json")
 
     return result
