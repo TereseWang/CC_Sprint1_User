@@ -85,9 +85,9 @@ def login():
             if user.pwd == pwd:
                 result = Response("success", status=200, content_type="application.json")
             else:
-                result = Response("invalid password", status=200, content_type="application.json")
+                result = Response("invalid password", status=500, content_type="application.json")
         else:
-            result = Response("email hasn't been registered", status=200, content_type="application.json")
+            result = Response("email hasn't been registered", status=500, content_type="application.json")
 
         return result
     except Exception as e:
@@ -105,7 +105,7 @@ def getUserInfo(uid):
             msg = user.toJson()
             result = Response(json.dumps(msg), status=200, content_type="application.json")
         else:
-            result = Response("userId cannot be found", status=200, content_type="application.json")
+            result = Response("userId cannot be found", status=500, content_type="application.json")
         return result
     except Exception as e:
         print(e)
