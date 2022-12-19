@@ -11,7 +11,7 @@ app = Flask(__name__,
             static_folder='static/class-ui/',
             template_folder='web/templates')
 CORS(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://admin:dbuserdbuser@ccprojectuser.coxdk1mcsnw2.us-east-1.rds.amazonaws.com/user_database?charset=utf8"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://admin:dbuserdbuser@e6156.coxdk1mcsnw2.us-east-1.rds.amazonaws.com/user_database?charset=utf8"
 
 db.init_app(app)
 
