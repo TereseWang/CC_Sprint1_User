@@ -65,9 +65,9 @@ def get_health():
 def register():
     try:
         last_name, first_name, middle_name, phone, image, email, pwd, confirmedPwd = request.form['last_name'], \
-                                                        request.form['first_name'], request.form['middle_name'], request.form['phone'],\
-                                                        request.form['image'], request.form['email'], request.form['pwd'],\
-                                                        request.form['confirmed_pwd']
+                                                        request.json['first_name'], request.form['middle_name'], request.form['phone'],\
+                                                        request.json['image'], request.form['email'], request.form['pwd'],\
+                                                        request.json['confirmed_pwd']
         if pwd != confirmedPwd:
             result = Response("password not matched", status=500, content_type="application.json")
             return result
@@ -86,7 +86,7 @@ def register():
 @app.route("/api/user/login", methods=["POST"])
 def login():
     try:
-        email, pwd = request.form['email'], request.form['pwd']
+        email, pwd = request.json['email'], request.json['pwd']
         hased_pwd = security.hash_password({"pwd": pwd})
         user = User.query.filter(User.email == email).first()
         if user:
@@ -138,12 +138,12 @@ def checkLogin():
 @app.route("/api/user/update", methods=["POST"])
 def updateById():
     try:
-        uid = request.form['uid']
+        uid = request.json['uid']
         if 'user session' in session and session['user session'] == int(uid):
-            last_name, first_name, middle_name, phone, image, email, pwd, confirmedPwd = request.form['last_name'], \
-                                                        request.form['first_name'], request.form['middle_name'], request.form['phone'],\
-                                                        request.form['image'], request.form['email'], request.form['pwd'],\
-                                                        request.form['confirmed_pwd']
+            last_name, first_name, middle_name, phone, image, email, pwd, confirmedPwd = request.json['last_name'], \
+                                                        request.json['first_name'], request.json['middle_name'], request.json['phone'],\
+                                                        request.json['image'], request.json['email'], request.json['pwd'],\
+                                                        request.json['confirmed_pwd']
             user = User.query.filter(User.userId == uid).first()
             if pwd != confirmedPwd:
                 result = Response("password not matched", status=500, content_type="application.json")
