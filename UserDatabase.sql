@@ -1,7 +1,6 @@
 drop database if exists user_database;
 create database user_database;
 use user_database;
-drop table if exists comments;
 create table user_info
 (
     uid int auto_increment
