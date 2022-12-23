@@ -1,17 +1,21 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
 from flask_cors import CORS
+from middleware.security import Security
+from functools import wraps
 
 db = SQLAlchemy()
 # Create the Flask application object.
+security = Security()
 app = Flask(__name__,
             static_url_path='/',
             static_folder='static/class-ui/',
             template_folder='web/templates')
 CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://admin:WHQ21cd1c689742@userdb.cyww6g5eerrg.us-east-1.rds.amazonaws.com:3306/user_database?charset=utf8"
+app.secret_key = "27eduCBA09"
 db.init_app(app)
 
 class User(db.Model):
@@ -45,7 +49,6 @@ class User(db.Model):
             'image': self.image
         }
 
-
 @app.get("/api/health")
 def get_health():
     t = str(datetime.now())
@@ -69,7 +72,8 @@ def register():
             result = Response("password not matched", status=500, content_type="application.json")
             return result
         else:
-            user = User(last_name, first_name, middle_name, phone, email, pwd, image)
+            hased_pwd = security.hash_password({"pwd": pwd})
+            user = User(last_name, first_name, middle_name, phone, email, hased_pwd, image)
             db.session.add(user)
             db.session.commit()
             result = Response("success", status=200, content_type="application.json")
@@ -83,22 +87,29 @@ def register():
 def login():
     try:
         email, pwd = request.form['email'], request.form['pwd']
+        hased_pwd = security.hash_password({"pwd": pwd})
         user = User.query.filter(User.email == email).first()
-        print(user)
         if user:
-            if user.pwd == pwd:
+            if user.pwd == hased_pwd:
                 result = Response("login success", status=200, content_type="application.json")
+                session["user session"] = user.userId
+                print(session)
             else:
                 result = Response("invalid password", status=500, content_type="application.json")
         else:
             result = Response("email hasn't been registered", status=500, content_type="application.json")
-
         return result
     except Exception as e:
         print(e)
         result = Response("login failed", status=500, content_type="application.json")
         return result
 
+@app.route("/api/user/logout")
+def logout():
+    session.pop("user session", None)
+    result = Response("logout success", status=200, content_type="application.json")
+    print(session)
+    return result
 
 @app.route("/api/user/info/<uid>", methods=["GET"])
 def getUserInfo(uid):
@@ -116,31 +127,43 @@ def getUserInfo(uid):
         result = Response("getUserInfo failed", status=500, content_type="application.json")
         return result
 
+@app.route("/api/user/checklogin", methods=["GET"])
+def checkLogin():
+    if "user session" in session:
+        result = Response(str(session["user session"]), status=200, content_type="application.json")
+        return result
+    else:
+        return Response("not log in", status=500, content_type="application.json")
 
 @app.route("/api/user/update", methods=["POST"])
 def updateById():
     try:
         uid = request.form['uid']
-        last_name, first_name, middle_name, phone, image, email, pwd, confirmedPwd = request.form['last_name'], \
+        if 'user session' in session and session['user session'] == int(uid):
+            last_name, first_name, middle_name, phone, image, email, pwd, confirmedPwd = request.form['last_name'], \
                                                         request.form['first_name'], request.form['middle_name'], request.form['phone'],\
                                                         request.form['image'], request.form['email'], request.form['pwd'],\
                                                         request.form['confirmed_pwd']
-        user = User.query.filter(User.userId == uid).first()
-        if pwd != confirmedPwd:
-            result = Response("password not matched", status=500, content_type="application.json")
-            return result
+            user = User.query.filter(User.userId == uid).first()
+            if pwd != confirmedPwd:
+                result = Response("password not matched", status=500, content_type="application.json")
+                return result
+            else:
+                user.lastName = last_name
+                user.firstName = first_name
+                user.middleName = middle_name
+                user.phone = phone
+                user.image = image
+                user.email = email
+                user.pwd = pwd
+                print(user)
+                db.session.add(user)
+                db.session.commit()
+                result = Response("update success", status=200, content_type="application.json")
+                return result
         else:
-            user.lastName = last_name
-            user.firstName = first_name
-            user.middleName = middle_name
-            user.phone = phone
-            user.image = image
-            user.email = email
-            user.pwd = pwd
-            print(user)
-            db.session.add(user)
-            db.session.commit()
-            result = Response("update success", status=200, content_type="application.json")
+            result = Response("update failed, not login", status=500, content_type="application.json")
+            print(session)
             return result
     except Exception as e:
         print(e)
@@ -163,4 +186,3 @@ def deleteUser(uid):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5011)
-
