@@ -14,7 +14,6 @@ CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://admin:WHQ21cd1c689742@userdb.cyww6g5eerrg.us-east-1.rds.amazonaws.com:3306/user_database?charset=utf8"
 db.init_app(app)
 
-
 class User(db.Model):
     __tablename__ = "user_info"
     userId = db.Column('uid', db.Integer, primary_key=True)
