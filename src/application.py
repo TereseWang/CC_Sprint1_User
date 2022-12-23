@@ -64,9 +64,9 @@ def get_health():
 @app.route("/api/user/register", methods=["POST"])
 def register():
     try:
-        last_name, first_name, middle_name, phone, image, email, pwd, confirmedPwd = request.form['last_name'], \
-                                                        request.json['first_name'], request.form['middle_name'], request.form['phone'],\
-                                                        request.json['image'], request.form['email'], request.form['pwd'],\
+        last_name, first_name, middle_name, phone, image, email, pwd, confirmedPwd = request.json['last_name'], \
+                                                        request.json['first_name'], request.json['middle_name'], request.json['phone'],\
+                                                        request.json['image'], request.json['email'], request.json['pwd'],\
                                                         request.json['confirmed_pwd']
         if pwd != confirmedPwd:
             result = Response("password not matched", status=500, content_type="application.json")
